@@ -24,9 +24,15 @@ struct Prizm : Module {
 
 	float phase = 0.f;
 
+	float mktri(float phase) {
+		return std::abs(phase);
+	}
+
 	void process(const ProcessArgs& args) override {
 		float pitch = clamp(params[PITCH_PARAM].getValue(), -4.f, 4.f);
-		float freq = dsp::FREQ_C4 * std::pow(2.f, pitch);
+		float freq = dsp::FREQ_C4 * std::pow(2.f, 0);
+
+		float mix = clamp(pitch, -1.f, 1.f);
 
 		// Accumulate the phase
 		phase += freq * args.sampleTime;
@@ -35,9 +41,14 @@ struct Prizm : Module {
 
 		// Compute the sine output
 		float sine = std::sin(2.f * M_PI * phase);
+		float sqr = phase > 0 ? 1 : -1;
+		float out = std::pow(
+			mix * std::pow(sine, 2) + (1 - mix) * std::pow(sqr, 2),
+			0.5f
+		);
 		// Audio signals are typically +/-5V
 		// https://vcvrack.com/manual/VoltageStandards
-		outputs[MAIN_OUTPUT].setVoltage(5.f * sine);
+		outputs[MAIN_OUTPUT].setVoltage(5.f * out);
 	}
 };
 
