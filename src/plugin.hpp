@@ -1,6 +1,6 @@
 #pragma once
 #include <rack.hpp>
-
+#include <logger.hpp>
 
 using namespace rack;
 
