@@ -3,6 +3,7 @@
 
 struct Prizm : Module {
 	enum ParamIds {
+		PITCH_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -24,11 +25,7 @@ struct Prizm : Module {
 	float phase = 0.f;
 
 	void process(const ProcessArgs& args) override {
-		// Compute the frequency from the pitch parameter and input
-		float pitch = 0;
-		// pitch += inputs[PITCH_INPUT].getVoltage();
-		pitch = clamp(pitch, -4.f, 4.f);
-		// The default pitch is C4 = 261.6256f
+		float pitch = clamp(params[PITCH_PARAM].getValue(), -4.f, 4.f);
 		float freq = dsp::FREQ_C4 * std::pow(2.f, pitch);
 
 		// Accumulate the phase
@@ -54,6 +51,8 @@ struct PrizmWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(15, 365)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
+
+		addParam(createParam<RoundLargeBlackKnob>(Vec(47, 61), module, Prizm::PITCH_PARAM));
 
 		addOutput(createOutput<PJ301MPort>(Vec(11, 320), module, Prizm::MAIN_OUTPUT));
 	}
