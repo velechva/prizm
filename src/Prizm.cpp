@@ -1,4 +1,5 @@
 #include "plugin.hpp"
+#include <random>
 
 struct Prizm : Module {
 	enum ParamIds {
@@ -16,6 +17,9 @@ struct Prizm : Module {
 	};
 	enum InputIds {
 		MOD_A_INPUT,
+		MOD_B_INPUT,
+		MOD_C_INPUT,
+		MOD_D_INPUT,
 		V_OCT_INPUT,
 		NUM_INPUTS
 	};
@@ -71,6 +75,15 @@ struct Prizm : Module {
 		return (sineWave(phase) + sineWave(phase * 2) + sineWave(phase + 5/7)) / 3;
 	}
 
+	float randomWave(float phase) {
+		float r = static_cast <float> (rand()) / static_cast <float> (1.0);
+		return r;
+	}
+
+	float crazierWave(float phase) {
+		return (sineWave(phase) + sineWave(phase * 2) + sineWave(phase + 5/7) + sineWave(phase + 7 / 9)) / 4;
+	}
+
 	Prizm() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(A_WAVE_TOGGLE, 0.0, 1.0, 0.0, "Wave Toggle A");
@@ -114,12 +127,13 @@ struct Prizm : Module {
 		float sineVal = sineWave(phase);
 		float sqreVal = squareWave(phase);
 		float subVal = subWave(phase);
-		float crazyVal = crazyWave(phase);
+		float crazyVal = crazierWave(phase);
 
-		float mix_a = clamp(params[A_WAVE_MIX].getValue(), 0.0, 1.0);
-		float mix_b = clamp(params[B_WAVE_MIX].getValue(), 0.0, 1.0);
-		float mix_c = clamp(params[C_WAVE_MIX].getValue(), 0.0, 1.0);
-		float mix_d = clamp(params[D_WAVE_MIX].getValue(), 0.0, 1.0);
+		// TODO normalize
+		float mix_a = clamp(params[A_WAVE_MIX].getValue() + inputs[MOD_A_INPUT].getVoltage(), 0.0, 1.0);
+		float mix_b = clamp(params[B_WAVE_MIX].getValue() + inputs[MOD_B_INPUT].getVoltage(), 0.0, 1.0);
+		float mix_c = clamp(params[C_WAVE_MIX].getValue() + inputs[MOD_C_INPUT].getVoltage(), 0.0, 1.0);
+		float mix_d = clamp(params[D_WAVE_MIX].getValue() + inputs[MOD_D_INPUT].getVoltage(), 0.0, 1.0);
 
 		float out = pythagoras(mix_a * sineVal, mix_b * sqreVal, mix_c * subVal, mix_d * crazyVal);
 
@@ -157,7 +171,11 @@ struct PrizmWidget : ModuleWidget {
 		addParam(createParam<WaveformPicker>(Vec(148, 256), module, Prizm::D_WAVE_TOGGLE));
 
 		addInput(createInput<PJ301MPort>(Vec(12, 310), module, Prizm::V_OCT_INPUT));
-		addInput(createInput<PJ301MPort>(Vec(95, 310), module, Prizm::MOD_A_INPUT));
+
+		addInput(createInput<PJ301MPort>(Vec(11, 125), module, Prizm::MOD_A_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(172, 125), module, Prizm::MOD_B_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(11, 182), module, Prizm::MOD_C_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(172, 182), module, Prizm::MOD_D_INPUT));
 
 		addOutput(createOutput<PJ301MPort>(Vec(175, 310), module, Prizm::MAIN_OUTPUT));
 	}
