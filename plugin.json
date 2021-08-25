@@ -1,6 +1,6 @@
 {
-  "slug": "Prism",
-  "name": "Prism",
+  "slug": "Prizm",
+  "name": "Prizm",
   "version": "1.0.0",
   "license": "open-source",
   "brand": "Flex",
@@ -12,5 +12,12 @@
   "sourceUrl": "",
   "donateUrl": "",
   "changelogUrl": "",
-  "modules": []
+  "modules": [
+    {
+      "slug": "Prizm",
+      "name": "Prizm",
+      "description": "",
+      "tags": ["VCO"]
+    }
+  ]
 }
