@@ -1,3 +1,10 @@
+/**
+ * @author: github.com/velechva
+ * 
+ * This software is licensed under the GNU General Public License v3.
+ * See LICENSE.md for more details
+ */
+
 #include "plugin.hpp"
 
 

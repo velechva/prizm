@@ -1,6 +1,14 @@
-#include "plugin.hpp"
+/**
+ * @author: github.com/velechva
+ * 
+ * This software is licensed under the GNU General Public License v3.
+ * See LICENSE.md for more details
+ */
+
 #include <random>
 
+#include "plugin.hpp"
+#include "math.hpp"
 struct Prizm : Module {
 	enum ParamIds {
 		PITCH_PARAM,
@@ -32,58 +40,6 @@ struct Prizm : Module {
 		NUM_LIGHTS
 	};
 
-	class WaveformGenerator {
-	public:
-		/**
-		 * Generate the current waveform value
-		 * @param phase -0.5 <= phase < 0.5
-		 */
-		virtual float getWavepoint(float phase);
-	};
-
-	class SineWaveformGenerator : public WaveformGenerator {
-		float getWavepoint(float phase) {
-			return std::sin(2.f * M_PI * phase);
-		}
-	};
-
-	class Oscillator {
-	private:
-		WaveformGenerator& m_generator;
-	public:
-		Oscillator(WaveformGenerator& generator) : m_generator(generator) {}
-
-		void setWaveformGenerator(WaveformGenerator& generator) { this->m_generator = generator; }
-	};
-
-	float sineWave(float phase) {
-		return std::sin(2.f * M_PI * phase);
-	}
-
-	float subWave(float phase) {
-		return std::sin(2.f * M_PI * phase / 4);
-	}
-
-	float squareWave(float phase) {
-		// if (phase > -1e-4 && phase < 1e-4) {
-		// 	return phase / 1e-4;
-		// }
-		return phase > 0 ? 1 : -1;
-	}
-
-	float crazyWave(float phase) {
-		return (sineWave(phase) + sineWave(phase * 2) + sineWave(phase + 5/7)) / 3;
-	}
-
-	float randomWave(float phase) {
-		float r = static_cast <float> (rand()) / static_cast <float> (1.0);
-		return r;
-	}
-
-	float crazierWave(float phase) {
-		return (sineWave(phase) + sineWave(phase * 2) + sineWave(phase + 5/7) + sineWave(phase + 7 / 9)) / 4;
-	}
-
 	Prizm() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(A_WAVE_TOGGLE, 0.0, 1.0, 0.0, "Wave Toggle A");
@@ -92,26 +48,7 @@ struct Prizm : Module {
 		configParam(D_WAVE_TOGGLE, 0.0, 1.0, 0.0, "Wave Toggle D");
 	}
 
-	float pythagoras(float a, float b, float c, float d) {
-		float sum = 0;
-		sum += std::pow(a, 2);
-		sum += std::pow(b, 2);
-		sum += std::pow(c, 2);
-		sum += std::pow(d, 2);
-		return std::pow(sum, 1.0 / 4);
-	}
-
 	float phase = 0.f;
-
-	void normalize(float& a, float& b, float& c, float& d) {
-		float sum = a + b + c + d;
-		if (sum < 1e-3) { return; }
-		float div = 1.0 / sum;
-		a = a * div;
-		b = b * div;
-		c = c * div;
-		d = d * div;
-	}
 
 	void process(const ProcessArgs& args) override {
 		float pitch = inputs[V_OCT_INPUT].getVoltage();
@@ -130,6 +67,7 @@ struct Prizm : Module {
 		float crazyVal = crazierWave(phase);
 
 		// TODO normalize
+		// TODO add normalize toggle switch
 		float mix_a = clamp(params[A_WAVE_MIX].getValue() + inputs[MOD_A_INPUT].getVoltage(), 0.0, 1.0);
 		float mix_b = clamp(params[B_WAVE_MIX].getValue() + inputs[MOD_B_INPUT].getVoltage(), 0.0, 1.0);
 		float mix_c = clamp(params[C_WAVE_MIX].getValue() + inputs[MOD_C_INPUT].getVoltage(), 0.0, 1.0);
