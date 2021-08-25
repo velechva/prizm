@@ -1,0 +1,16 @@
+{
+  "slug": "Prism",
+  "name": "Prism",
+  "version": "1.0.0",
+  "license": "open-source",
+  "brand": "Flex",
+  "author": "github.com/velechva",
+  "authorEmail": "",
+  "authorUrl": "github.com/velechva",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": []
+}
