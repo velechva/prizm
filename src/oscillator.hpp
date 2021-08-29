@@ -5,19 +5,47 @@
  * See LICENSE.md for more details
  */
 
-class Oscillator {
-private:
-    WaveformGenerator& m_generator;
+#include <boost/circular_buffer.hpp>
+
+#include "plugin.hpp"
+#include "types.hpp"
+
+#include "wavetables.hpp"
+
+class WavetableOscillator {
 public:
-    enum Waveforms {
-        SINE_WAVE,
-        SQUARE_WAVE,
-        CRAZY_WAVE,
-        PW_25,
-        PW_75
+    /**
+     * Wavetable to generate
+     * 
+     * @note for performance reasons, order matters. @see{WaveformPicker}
+     */
+    enum Wavetable {
+        SINE,
+        SQUARE,
+        CRAZY_SINE,
+        FM_ONE
     };
 
-    Oscillator() : m_generator(generator) {}
+    float getNextWavepoint(phase phase, float smooth) const {
+        if (this->m_waveTable == Wavetable::SINE) {
+            return getSineWave(phase);
+        }
+        else if (this->m_waveTable == Wavetable::CRAZY_SINE) {
+            return getCrazySineWave(phase);
+        }
+        else if (this->m_waveTable == Wavetable::FM_ONE) {
+            return getFMOneWave(phase);
+        }
 
-    void setWaveformGenerator(WaveformGenerator& generator) { this->m_generator = generator; }
+        return getSquareWave(phase);
+    }
+
+    void setWavetable(Wavetable wavetable) {
+        this->m_waveTable = wavetable;
+    }
+private:
+    Wavetable m_waveTable = SINE;
+
+    boost::circular_buffer<float> m_lookback_buffer { 1024 };
+
 };

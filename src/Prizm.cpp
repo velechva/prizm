@@ -9,7 +9,26 @@
 
 #include "plugin.hpp"
 #include "math.hpp"
-struct Prizm : Module {
+#include "types.hpp"
+#include "oscillator.hpp"
+
+#define NUM_OSCILLATORS 4
+
+/**
+ * Widget switch to toggle waveform for an oscillator
+ * 
+ * @note for performance reasons, this should have the same order as @see{WavetableOscillator::Wavetable}
+ */
+struct WaveformPicker : SvgSwitch {
+	WaveformPicker() {
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch/Sine.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch/Square.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch/Crazy-Sine.svg")));
+	}
+};
+
+class Prizm : public Module {
+public:
 	enum ParamIds {
 		PITCH_PARAM,
 		A_WAVE_TOGGLE,
@@ -42,49 +61,74 @@ struct Prizm : Module {
 
 	Prizm() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(A_WAVE_TOGGLE, 0.0, 1.0, 0.0, "Wave Toggle A");
-		configParam(B_WAVE_TOGGLE, 0.0, 1.0, 0.0, "Wave Toggle B");
-		configParam(C_WAVE_TOGGLE, 0.0, 1.0, 0.0, "Wave Toggle C");
-		configParam(D_WAVE_TOGGLE, 0.0, 1.0, 0.0, "Wave Toggle D");
+		configParam(A_WAVE_TOGGLE, 0.0, 5.0, 0.0, "Wave Toggle A");
+		configParam(B_WAVE_TOGGLE, 0.0, 5.0, 0.0, "Wave Toggle B");
+		configParam(C_WAVE_TOGGLE, 0.0, 5.0, 0.0, "Wave Toggle C");
+		configParam(D_WAVE_TOGGLE, 0.0, 5.0, 0.0, "Wave Toggle D");
+
+		this->m_oscillators[0].setWavetable(WavetableOscillator::Wavetable::SINE);
+		this->m_oscillators[1].setWavetable(WavetableOscillator::Wavetable::SQUARE);
+		this->m_oscillators[2].setWavetable(WavetableOscillator::Wavetable::CRAZY_SINE);
+		this->m_oscillators[3].setWavetable(WavetableOscillator::Wavetable::FM_ONE);
 	}
 
-	float phase = 0.f;
-
+	/**
+	 * Process a new sample
+	 */
 	void process(const ProcessArgs& args) override {
-		float pitch = inputs[V_OCT_INPUT].getVoltage();
-		float freq = dsp::FREQ_C4 * std::pow(2.f, pitch);
+		accumulatePhase(args);
 
-		// Accumulate the phase
-		phase += freq * args.sampleTime;
-		if (phase >= 0.5f)
-			phase -= 1.f;
+		for (size_t i = 0; i < 4; i++) {
+			auto oscillator = m_oscillators[i];
 
+			/**
+			 * current un-normalized mix value = switch value + cv input value
+			 */
+			m_mixValues[i] = clamp(
+				inputs[MOD_A_INPUT + i].getVoltage() + params[A_WAVE_MIX + i].getValue(),
+				-5.0f, 5.0f
+			);
 
-		// Compute the sine output
-		float sineVal = sineWave(phase);
-		float sqreVal = squareWave(phase);
-		float subVal = subWave(phase);
-		float crazyVal = crazierWave(phase);
+			m_wavepoints[i] = oscillator.getNextWavepoint(m_phase, 0.5f);
+		}
 
-		// TODO normalize
-		// TODO add normalize toggle switch
-		float mix_a = clamp(params[A_WAVE_MIX].getValue() + inputs[MOD_A_INPUT].getVoltage(), 0.0, 1.0);
-		float mix_b = clamp(params[B_WAVE_MIX].getValue() + inputs[MOD_B_INPUT].getVoltage(), 0.0, 1.0);
-		float mix_c = clamp(params[C_WAVE_MIX].getValue() + inputs[MOD_C_INPUT].getVoltage(), 0.0, 1.0);
-		float mix_d = clamp(params[D_WAVE_MIX].getValue() + inputs[MOD_D_INPUT].getVoltage(), 0.0, 1.0);
+		normalize(m_mixValues, NUM_OSCILLATORS);
 
-		float out = pythagoras(mix_a * sineVal, mix_b * sqreVal, mix_c * subVal, mix_d * crazyVal);
+		for (size_t i = 0; i < NUM_OSCILLATORS; i++) {
+			m_wavepoints[i] *= m_mixValues[i];
+		}
+
+		float output = tanh(pythagoras(m_wavepoints, NUM_OSCILLATORS));
 
 		if (outputs[MAIN_OUTPUT].isConnected()) {
-			outputs[MAIN_OUTPUT].setVoltage(5.f * out);
+			outputs[MAIN_OUTPUT].setVoltage(5.0f * output);
 		}
 	}
-};
+private:
+	float m_phase = 0.0f;
 
-struct WaveformPicker : SVGSwitch {
-	WaveformPicker() {
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch-Sin.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch-Sqr.svg")));
+	float m_wavepoints [NUM_OSCILLATORS] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	float m_mixValues  [NUM_OSCILLATORS] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	WavetableOscillator m_oscillators [4] = { 
+		WavetableOscillator(), 
+		WavetableOscillator(), 
+		WavetableOscillator(), 
+		WavetableOscillator() 
+	};
+
+	inline hz getFrequency() {
+		float pitch = inputs[V_OCT_INPUT].getVoltage();
+
+		return dsp::FREQ_C4 * std::pow(2.0f, pitch);
+	}
+
+	inline void accumulatePhase(const ProcessArgs& args) {
+		m_phase += this->getFrequency() * args.sampleTime;
+
+		if (m_phase >= 0.5f) {
+			m_phase -= 1.f;
+		}
 	}
 };
 
