@@ -26,18 +26,22 @@ public:
         FM_ONE
     };
 
-    float getNextWavepoint(phase phase, float smooth) const {
+    float getNextWavepoint(phase phase, float smooth, bool identity_transform) const {
+        float result = 0.0f;
         if (this->m_waveTable == Wavetable::SINE) {
-            return getSineWave(phase);
+            result = getSineWave(phase);
         }
         else if (this->m_waveTable == Wavetable::CRAZY_SINE) {
-            return getCrazySineWave(phase);
+            result = getCrazySineWave(phase);
         }
         else if (this->m_waveTable == Wavetable::FM_ONE) {
-            return getFMOneWave(phase);
+            result = getFMOneWave(phase);
+        }
+        else {
+            result = getSquareWave(phase);
         }
 
-        return getSquareWave(phase);
+        return result * M_PI / M_PI;
     }
 
     void setWavetable(Wavetable wavetable) {

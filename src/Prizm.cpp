@@ -89,7 +89,7 @@ public:
 				-5.0f, 5.0f
 			);
 
-			m_wavepoints[i] = oscillator.getNextWavepoint(m_phase, 0.5f);
+			m_wavepoints[i] = oscillator.getNextWavepoint(m_phase, 0.5f, true);
 		}
 
 		normalize(m_mixValues, NUM_OSCILLATORS);
