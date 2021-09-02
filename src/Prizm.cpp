@@ -31,23 +31,35 @@ class Prizm : public Module {
 public:
 	enum ParamIds {
 		PITCH_PARAM,
-		A_WAVE_TOGGLE,
-		B_WAVE_TOGGLE,
-		C_WAVE_TOGGLE,
-		D_WAVE_TOGGLE,
-		A_WAVE_MIX,
-		B_WAVE_MIX,
-		C_WAVE_MIX,
-		D_WAVE_MIX,
-		KEY_TRACK_AMOUNT,
+		A_WAVE_SHAPE,
+		B_WAVE_SHAPE,
+		C_WAVE_SHAPE,
+		D_WAVE_SHAPE,
+		A_INTENSITY,
+		B_INTENSITY,
+		C_INTENSITY,
+		D_INTENSITY,
+		A_FINE,
+		B_FINE,
+		C_FINE,
+		D_FINE,
+		A_COARSE,
+		B_COARSE,
+		C_COARSE,
+		D_COARSE,
+		MORPH_STYLE,
+		MASS,
+		SMOOTH,
 		NUM_PARAMS
 	};
 	enum InputIds {
-		MOD_A_INPUT,
-		MOD_B_INPUT,
-		MOD_C_INPUT,
-		MOD_D_INPUT,
-		V_OCT_INPUT,
+		A_INTENSITY_MOD,
+		B_INTENSITY_MOD,
+		C_INTENSITY_MOD,
+		D_INTENSITY_MOD,
+		MASS_MOD,
+		SMOOTH_MOD,
+		V_OCT,
 		NUM_INPUTS
 	};
 	enum OutputIds {
@@ -61,10 +73,11 @@ public:
 
 	Prizm() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(A_WAVE_TOGGLE, 0.0, 5.0, 0.0, "Wave Toggle A");
-		configParam(B_WAVE_TOGGLE, 0.0, 5.0, 0.0, "Wave Toggle B");
-		configParam(C_WAVE_TOGGLE, 0.0, 5.0, 0.0, "Wave Toggle C");
-		configParam(D_WAVE_TOGGLE, 0.0, 5.0, 0.0, "Wave Toggle D");
+
+		configParam(A_WAVE_SHAPE, 0.0, 5.0, 0.0, "Wave Toggle A");
+		configParam(B_WAVE_SHAPE, 0.0, 5.0, 0.0, "Wave Toggle B");
+		configParam(C_WAVE_SHAPE, 0.0, 5.0, 0.0, "Wave Toggle C");
+		configParam(D_WAVE_SHAPE, 0.0, 5.0, 0.0, "Wave Toggle D");
 
 		this->m_oscillators[0].setWavetable(WavetableOscillator::Wavetable::SINE);
 		this->m_oscillators[1].setWavetable(WavetableOscillator::Wavetable::SQUARE);
@@ -85,7 +98,7 @@ public:
 			 * current un-normalized mix value = switch value + cv input value
 			 */
 			m_mixValues[i] = clamp(
-				inputs[MOD_A_INPUT + i].getVoltage() + params[A_WAVE_MIX + i].getValue(),
+				inputs[A_INTENSITY_MOD + i].getVoltage() + params[A_INTENSITY + i].getValue(),
 				-5.0f, 5.0f
 			);
 
@@ -118,7 +131,7 @@ private:
 	};
 
 	inline hz getFrequency() {
-		float pitch = inputs[V_OCT_INPUT].getVoltage();
+		float pitch = inputs[V_OCT].getVoltage();
 
 		return dsp::FREQ_C4 * std::pow(2.0f, pitch);
 	}
@@ -133,6 +146,9 @@ private:
 };
 
 struct PrizmWidget : ModuleWidget {
+	const float scale_x = 2.74;
+	const float scale_y = 2.6;
+
 	PrizmWidget(Prizm* module) {
 		setModule(module);
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Prizm.svg")));
@@ -142,22 +158,30 @@ struct PrizmWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(15, 365)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
 
-		addParam(createParam<RoundBlackKnob>(Vec(11, 55), module, Prizm::A_WAVE_MIX));
-		addParam(createParam<RoundBlackKnob>(Vec(172, 55), module, Prizm::B_WAVE_MIX));
-		addParam(createParam<RoundBlackKnob>(Vec(11, 220), module, Prizm::C_WAVE_MIX));
-		addParam(createParam<RoundBlackKnob>(Vec(172, 220), module, Prizm::D_WAVE_MIX));
+		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*100.1, scale_y*46.7), module, Prizm::A_INTENSITY));
+		addParam(createParam<RoundSmallBlackKnob>(Vec(172, 55), module, Prizm::B_INTENSITY));
+		addParam(createParam<RoundSmallBlackKnob>(Vec(11, 220), module, Prizm::C_INTENSITY));
+		addParam(createParam<RoundSmallBlackKnob>(Vec(172, 220), module, Prizm::D_INTENSITY));
 
-		addParam(createParam<WaveformPicker>(Vec(3, 91), module, Prizm::A_WAVE_TOGGLE));
-		addParam(createParam<WaveformPicker>(Vec(148, 91), module, Prizm::B_WAVE_TOGGLE));
-		addParam(createParam<WaveformPicker>(Vec(3, 256), module, Prizm::C_WAVE_TOGGLE));
-		addParam(createParam<WaveformPicker>(Vec(148, 256), module, Prizm::D_WAVE_TOGGLE));
+		// addParam(createParam<WaveformPicker>(Vec(3, 91), module, Prizm::A_WAVE_SHAPE));
+		// addParam(createParam<WaveformPicker>(Vec(148, 91), module, Prizm::B_WAVE_SHAPE));
+		// addParam(createParam<WaveformPicker>(Vec(3, 256), module, Prizm::C_WAVE_SHAPE));
+		// addParam(createParam<WaveformPicker>(Vec(148, 256), module, Prizm::D_WAVE_SHAPE));
 
-		addInput(createInput<PJ301MPort>(Vec(12, 310), module, Prizm::V_OCT_INPUT));
+		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*100.1, scale_y*40), module, Prizm::C_WAVE_SHAPE));
+		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*100.1, scale_y*87.7), module, Prizm::D_WAVE_SHAPE));
 
-		addInput(createInput<PJ301MPort>(Vec(11, 125), module, Prizm::MOD_A_INPUT));
-		addInput(createInput<PJ301MPort>(Vec(172, 125), module, Prizm::MOD_B_INPUT));
-		addInput(createInput<PJ301MPort>(Vec(11, 182), module, Prizm::MOD_C_INPUT));
-		addInput(createInput<PJ301MPort>(Vec(172, 182), module, Prizm::MOD_D_INPUT));
+		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*134.5, scale_y*33), module, Prizm::MORPH_STYLE));
+		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*134.5, scale_y*93.7), module, Prizm::SMOOTH));
+
+		addInput(createInput<PJ301MPort>(Vec(12, 310), module, Prizm::V_OCT));
+		addInput(createInput<PJ301MPort>(Vec(scale_x*134.5, scale_y*61.6), module, Prizm::MASS_MOD));
+		addInput(createInput<PJ301MPort>(Vec(172, 182), module, Prizm::SMOOTH_MOD));
+
+		addInput(createInput<PJ301MPort>(Vec(11, 125), module, Prizm::A_INTENSITY_MOD));
+		addInput(createInput<PJ301MPort>(Vec(172, 125), module, Prizm::B_INTENSITY_MOD));
+		addInput(createInput<PJ301MPort>(Vec(11, 182), module, Prizm::C_INTENSITY_MOD));
+		addInput(createInput<PJ301MPort>(Vec(172, 182), module, Prizm::D_INTENSITY_MOD));
 
 		addOutput(createOutput<PJ301MPort>(Vec(175, 310), module, Prizm::MAIN_OUTPUT));
 	}
