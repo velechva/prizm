@@ -1,6 +1,6 @@
 # Prizm
 
-4D morphing oscillator for VCV Rack
+4D pythagorean morphing oscillator for VCV Rack
 
 ## License
 

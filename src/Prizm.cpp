@@ -21,9 +21,9 @@
  */
 struct WaveformPicker : SvgSwitch {
 	WaveformPicker() {
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch/Sine.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch/Square.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch/Crazy-Sine.svg")));
+//		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch/Sine.svg")));
+//		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch/Square.svg")));
+//		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch/Crazy-Sine.svg")));
 	}
 };
 
@@ -146,45 +146,50 @@ private:
 };
 
 struct PrizmWidget : ModuleWidget {
-	const float scale_x = 2.74;
-	const float scale_y = 2.6;
-
 	PrizmWidget(Prizm* module) {
-		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Prizm.svg")));
-
-		addChild(createWidget<ScrewSilver>(Vec(15, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(15, 365)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
-
-		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*100.1, scale_y*46.7), module, Prizm::A_INTENSITY));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(172, 55), module, Prizm::B_INTENSITY));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(11, 220), module, Prizm::C_INTENSITY));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(172, 220), module, Prizm::D_INTENSITY));
+//		setModule(module);
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/panel.svg")));
+//
+//		addChild(createWidget<ScrewSilver>(Vec(15, 0)));
+//		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 0)));
+//		addChild(createWidget<ScrewSilver>(Vec(15, 365)));
+//		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
+//
+//		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*100.1, scale_y*46.7), module, Prizm::A_INTENSITY));
+//		addParam(createParam<RoundSmallBlackKnob>(Vec(172, 55), module, Prizm::B_INTENSITY));
+//		addParam(createParam<RoundSmallBlackKnob>(Vec(11, 220), module, Prizm::C_INTENSITY));
+//		addParam(createParam<RoundSmallBlackKnob>(Vec(172, 220), module, Prizm::D_INTENSITY));
 
 		// addParam(createParam<WaveformPicker>(Vec(3, 91), module, Prizm::A_WAVE_SHAPE));
 		// addParam(createParam<WaveformPicker>(Vec(148, 91), module, Prizm::B_WAVE_SHAPE));
 		// addParam(createParam<WaveformPicker>(Vec(3, 256), module, Prizm::C_WAVE_SHAPE));
 		// addParam(createParam<WaveformPicker>(Vec(148, 256), module, Prizm::D_WAVE_SHAPE));
 
-		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*100.1, scale_y*40), module, Prizm::C_WAVE_SHAPE));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*100.1, scale_y*87.7), module, Prizm::D_WAVE_SHAPE));
-
-		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*134.5, scale_y*33), module, Prizm::MORPH_STYLE));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*134.5, scale_y*93.7), module, Prizm::SMOOTH));
-
-		addInput(createInput<PJ301MPort>(Vec(12, 310), module, Prizm::V_OCT));
-		addInput(createInput<PJ301MPort>(Vec(scale_x*134.5, scale_y*61.6), module, Prizm::MASS_MOD));
-		addInput(createInput<PJ301MPort>(Vec(172, 182), module, Prizm::SMOOTH_MOD));
-
-		addInput(createInput<PJ301MPort>(Vec(11, 125), module, Prizm::A_INTENSITY_MOD));
-		addInput(createInput<PJ301MPort>(Vec(172, 125), module, Prizm::B_INTENSITY_MOD));
-		addInput(createInput<PJ301MPort>(Vec(11, 182), module, Prizm::C_INTENSITY_MOD));
-		addInput(createInput<PJ301MPort>(Vec(172, 182), module, Prizm::D_INTENSITY_MOD));
-
-		addOutput(createOutput<PJ301MPort>(Vec(175, 310), module, Prizm::MAIN_OUTPUT));
+//		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*100.1, scale_y*40), module, Prizm::C_WAVE_SHAPE));
+//		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*100.1, scale_y*87.7), module, Prizm::D_WAVE_SHAPE));
+//
+//		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*134.5, scale_y*33), module, Prizm::MORPH_STYLE));
+//		addParam(createParam<RoundSmallBlackKnob>(Vec(scale_x*134.5, scale_y*93.7), module, Prizm::SMOOTH));
+//
+//		addInput(createInput<PJ301MPort>(Vec(12, 310), module, Prizm::V_OCT));
+//		addInput(createInput<PJ301MPort>(Vec(scale_x*134.5, scale_y*61.6), module, Prizm::MASS_MOD));
+//		addInput(createInput<PJ301MPort>(Vec(172, 182), module, Prizm::SMOOTH_MOD));
+//
+//		addInput(createInput<PJ301MPort>(Vec(11, 125), module, Prizm::A_INTENSITY_MOD));
+//		addInput(createInput<PJ301MPort>(Vec(172, 125), module, Prizm::B_INTENSITY_MOD));
+//		addInput(createInput<PJ301MPort>(Vec(11, 182), module, Prizm::C_INTENSITY_MOD));
+//		addInput(createInput<PJ301MPort>(Vec(172, 182), module, Prizm::D_INTENSITY_MOD));
+//
+//		addOutput(createOutput<PJ301MPort>(Vec(175, 310), module, Prizm::MAIN_OUTPUT));
+//
+//		// todo
+//		addInput(Vec(X_SCALE * 8, Y_SCALE * 20)
 	}
+
+private:
+	// Scale factors for 72-DPI
+	const float scale_x = 2.74;
+	const float scale_y = 2.6;
 };
 
 Model* modelPrizm = createModel<Prizm, PrizmWidget>("Prizm");
