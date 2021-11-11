@@ -1,13 +1,3 @@
-/**
- * @author: github.com/velechva
- * 
- * This software is licensed under the GNU General Public License v3.
- * See LICENSE.md for more details
- */
-
-/**
- * Simple pythagorean morpher
- */
 inline float pythagoras(const float wavepoints[], size_t sz) {
     float sum = 0;
 
@@ -18,9 +8,6 @@ inline float pythagoras(const float wavepoints[], size_t sz) {
     return std::pow(sum, 0.5f);
 }
 
-/**
- * Simple mixing (additive) summer
- */
 inline float sum(const float wavepoints[], size_t sz) {
     float sum = 0;
 
@@ -31,9 +18,6 @@ inline float sum(const float wavepoints[], size_t sz) {
     return sum;
 }
 
-/**
- * @todo finish
- */
 inline void normalize(float vals[], size_t sz) {
     float cf = 1.0f / clamp(sum(vals, sz) / 4, 0.1f, 1.0f);
 

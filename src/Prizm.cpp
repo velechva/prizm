@@ -12,20 +12,7 @@
 #include "types.hpp"
 #include "oscillator.hpp"
 
-#define NUM_OSCILLATORS 4
-
-/**
- * Widget switch to toggle waveform for an oscillator
- * 
- * @note for performance reasons, this should have the same order as @see{WavetableOscillator::Wavetable}
- */
-struct WaveformPicker : SvgSwitch {
-	WaveformPicker() {
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch/Sine.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch/Square.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Switch/Crazy-Sine.svg")));
-	}
-};
+#define NUM_OSCILLATORS 2
 
 class Prizm : public Module {
 public:
@@ -51,31 +38,27 @@ public:
 		NUM_OUTPUTS
 	};
 	enum LightIds {
-		ENUMS(PHASE_LIGHT, 3),
 		NUM_LIGHTS
 	};
 
 	Prizm() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-		configParam(A_WAVE_SHAPE, 0.0, 5.0, 0.0, "Wave Toggle A");
-		configParam(B_WAVE_SHAPE, 0.0, 5.0, 0.0, "Wave Toggle B");
-		configParam(C_WAVE_SHAPE, 0.0, 5.0, 0.0, "Wave Toggle C");
-		configParam(D_WAVE_SHAPE, 0.0, 5.0, 0.0, "Wave Toggle D");
-
-		this->m_oscillators[0].setWavetable(WavetableOscillator::Wavetable::SINE);
-		this->m_oscillators[1].setWavetable(WavetableOscillator::Wavetable::SQUARE);
-		this->m_oscillators[2].setWavetable(WavetableOscillator::Wavetable::CRAZY_SINE);
-		this->m_oscillators[3].setWavetable(WavetableOscillator::Wavetable::FM_ONE);
+		configParam(A_WAVE_SHAPE, 0.0, 5.0, 0.0, "A Wave Shape");
+		configParam(B_WAVE_SHAPE, 0.0, 5.0, 0.0, "B Wave Shape");
+		configParam(A_INTENSITY, 0.0, 5.0, 0.0, "A Intensity");
+		configParam(B_INTENSITY, 0.0, 5.0, 0.0, "B Intensity");
 	}
 
 	/**
 	 * Process a new sample
 	 */
-	void process(const ProcessArgs& args) override {
+	void process(const ProcessArgs& args) override
+    {
 		accumulatePhase(args);
 
-		for (size_t i = 0; i < 4; i++) {
+		for (size_t i = 0; i < NUM_OSCILLATORS; i++)
+        {
 			auto oscillator = m_oscillators[i];
 
 			/**
@@ -86,12 +69,18 @@ public:
 				-5.0f, 5.0f
 			);
 
-			m_wavepoints[i] = oscillator.getNextWavepoint(m_phase, 0.5f, true);
+            float wave_shape_param = clamp(
+                    inputs[A_WAVE_SHAPE_MOD + i].getVoltage() + params[A_WAVE_SHAPE_MOD + i].getValue(),
+                    -5.0f, 5.0f
+                    ) + 5.0f;
+
+			m_wavepoints[i] = oscillator.getNextWavepoint(m_phase, wave_shape_param);
 		}
 
-		normalize(m_mixValues, NUM_OSCILLATORS);
+        normalize(m_mixValues, NUM_OSCILLATORS);
 
-		for (size_t i = 0; i < NUM_OSCILLATORS; i++) {
+		for (size_t i = 0; i < NUM_OSCILLATORS; i++)
+        {
 			m_wavepoints[i] *= m_mixValues[i];
 		}
 
@@ -104,23 +93,24 @@ public:
 private:
 	float m_phase = 0.0f;
 
-	float m_wavepoints [NUM_OSCILLATORS] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	float m_mixValues  [NUM_OSCILLATORS] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	float m_wavepoints [NUM_OSCILLATORS] = { 0.0f, 0.0f };
+	float m_mixValues  [NUM_OSCILLATORS] = { 0.0f, 0.0f };
 
-	WavetableOscillator m_oscillators [4] = { 
+	WavetableOscillator m_oscillators [2] =
+    {
 		WavetableOscillator(), 
-		WavetableOscillator(), 
-		WavetableOscillator(), 
-		WavetableOscillator() 
+		WavetableOscillator()
 	};
 
-	inline hz getFrequency() {
+	inline hz getFrequency()
+    {
 		float pitch = inputs[V_OCT].getVoltage();
 
 		return dsp::FREQ_C4 * std::pow(2.0f, pitch);
 	}
 
-	inline void accumulatePhase(const ProcessArgs& args) {
+	inline void accumulatePhase(const ProcessArgs& args)
+    {
 		m_phase += this->getFrequency() * args.sampleTime;
 
 		if (m_phase >= 0.5f) {
@@ -129,8 +119,10 @@ private:
 	}
 };
 
-struct PrizmWidget : ModuleWidget {
-	PrizmWidget(Prizm* module) {
+struct PrizmWidget : ModuleWidget
+{
+	PrizmWidget(Prizm* module)
+    {
 		setModule(module);
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/panel.svg")));
 
