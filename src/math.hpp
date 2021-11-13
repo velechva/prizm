@@ -19,7 +19,7 @@ inline float sum(const float wavepoints[], size_t sz) {
 }
 
 inline void normalize(float vals[], size_t sz) {
-    float cf = 1.0f / clamp(sum(vals, sz) / 4, 0.1f, 1.0f);
+    float cf = 1.0f / clamp(sum(vals, sz) / static_cast<float>(sz), 0.01f, 1.0f);
 
     vals[0] *= cf;
     vals[1] *= cf;
