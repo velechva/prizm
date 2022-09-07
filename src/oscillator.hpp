@@ -9,37 +9,32 @@
 
 class WavetableOscillator
 {
+private:
+    const static size_t NUM_WAVE_SHAPES = 9;
+    const WaveShape waveShapes[NUM_WAVE_SHAPES] = {
+            WaveShapes::sin,
+            WaveShapes::triangle,
+            WaveShapes::square,
+            WaveShapes::wild_sin,
+            WaveShapes::fm_one,
+            WaveShapes::fm_two,
+            WaveShapes::fm_three,
+            WaveShapes::fm_four,
+            WaveShapes::fm_five
+    };
+
 public:
     float wavepoint(phase phase, float wave_shape_param) const
     {
-        if (wave_shape_param < 0.1) {
-            return WaveShapes::sin(phase);
-        }
-        if (wave_shape_param < 0.2) {
-            return WaveShapes::triangle(phase);
-        }
-        if (wave_shape_param < 0.3) {
-            return WaveShapes::square(phase);
-        }
-        if (wave_shape_param < 0.4) {
-            return WaveShapes::wild_sin(phase);
-        }
-        if (wave_shape_param < 0.5) {
-            return WaveShapes::fm_one(phase);
-        }
-        if (wave_shape_param < 0.6) {
-            return WaveShapes::fm_two(phase);
-        }
-        if (wave_shape_param < 0.7) {
-            return WaveShapes::fm_three(phase);
-        }
-        if (wave_shape_param < 0.8) {
-            return WaveShapes::fm_four(phase);
-        }
-        if (wave_shape_param < 0.9) {
-            return WaveShapes::fm_five(phase);
-        }
+        auto waveShapeParamScaled = wave_shape_param * NUM_WAVE_SHAPES;
 
-        return WaveShapes::fm_one(phase);
+        auto previousIndex = std::min(static_cast<int>(NUM_WAVE_SHAPES - 1), static_cast<int>(floor(waveShapeParamScaled)));
+        auto nextIndex     = std::min(static_cast<int>(NUM_WAVE_SHAPES - 1), static_cast<int>(ceil(waveShapeParamScaled)));
+        auto ratio         = waveShapeParamScaled - previousIndex;
+
+        auto previousWaveform = waveShapes[previousIndex](phase);
+        auto nextWaveform     = waveShapes[nextIndex](phase);
+
+        return (1 - ratio) * previousWaveform + ratio * nextWaveform;
     }
 };

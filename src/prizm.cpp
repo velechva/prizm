@@ -8,15 +8,17 @@
 #include <random>
 
 #include "plugin.hpp"
-#include "math.hpp"
+#include "dsp.hpp"
 #include "types.hpp"
 #include "oscillator.hpp"
 
 #define NUM_OSCILLATORS 4
 
-class Prizm : public Module {
+class Prizm : public Module
+{
 public:
-	enum ParamIds {
+	enum ParamIds
+    {
 		A_WAVE_SHAPE,
 		B_WAVE_SHAPE,
         C_WAVE_SHAPE,
@@ -27,7 +29,9 @@ public:
         D_INTENSITY,
 		NUM_PARAMS
 	};
-	enum InputIds {
+
+	enum InputIds
+    {
 		A_INTENSITY_MOD,
 		B_INTENSITY_MOD,
         C_INTENSITY_MOD,
@@ -39,15 +43,20 @@ public:
 		V_OCT,
 		NUM_INPUTS
 	};
-	enum OutputIds {
+
+	enum OutputIds
+    {
 		MAIN_OUTPUT,
 		NUM_OUTPUTS
 	};
-	enum LightIds {
+
+	enum LightIds
+    {
 		NUM_LIGHTS
 	};
 
-	Prizm() {
+	Prizm()
+    {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
 		configParam(A_WAVE_SHAPE, 0.0, 1.0, 0.0, "A Wave Shape");
@@ -58,7 +67,6 @@ public:
 		configParam(B_INTENSITY, 0.0, 1.0, 0.0, "B Intensity");
         configParam(C_INTENSITY, 0.0, 1.0, 0.0, "C Intensity");
         configParam(D_INTENSITY, 0.0, 1.0, 0.0, "D Intensity");
-
     }
 
 	/**
@@ -97,7 +105,8 @@ public:
 
 		float output = tanh(pythagoras(m_wavepoints, NUM_OSCILLATORS));
 
-		if (outputs[MAIN_OUTPUT].isConnected()) {
+		if (outputs[MAIN_OUTPUT].isConnected())
+        {
 			outputs[MAIN_OUTPUT].setVoltage(5.0f * output);
 		}
 	}
