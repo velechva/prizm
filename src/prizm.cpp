@@ -9,7 +9,6 @@
 
 #include "plugin.hpp"
 #include "dsp.hpp"
-#include "types.hpp"
 #include "oscillator.hpp"
 
 #define NUM_OSCILLATORS 4
@@ -96,14 +95,14 @@ public:
 			m_wavepoints[i] = oscillator.wavepoint(m_phase, wave_shape_param);
 		}
 
-        normalize(m_mixValues, NUM_OSCILLATORS);
+        ::dsp::normalize(m_mixValues, NUM_OSCILLATORS);
 
 		for (size_t i = 0; i < NUM_OSCILLATORS; i++)
         {
 			m_wavepoints[i] *= m_mixValues[i];
 		}
 
-		float output = tanh(pythagoras(m_wavepoints, NUM_OSCILLATORS));
+		float output = tanh(::dsp::pythagoras(m_wavepoints, NUM_OSCILLATORS));
 
 		if (outputs[MAIN_OUTPUT].isConnected())
         {
@@ -128,7 +127,7 @@ private:
     {
 		float pitch = inputs[V_OCT].getVoltage();
 
-		return dsp::FREQ_C4 * std::pow(2.0f, pitch);
+		return rack::dsp::FREQ_C4 * std::pow(2.0f, pitch);
 	}
 
 	inline void accumulatePhase(const ProcessArgs& args)
